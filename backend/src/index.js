@@ -22,8 +22,8 @@ app.use(
     secret: process.env.JWT_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({      
-      mongoUrl: process.env.MONGO_URL,
+    store: MongoStore.create({
+      client: mongoose.connection.getClient(),
       collectionName: "sessions",
     }),
     cookie: {
