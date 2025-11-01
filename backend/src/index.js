@@ -19,24 +19,24 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173",
-//     credentials: true,
-//   })
-// );
-// 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://chatty-ui-2z90.onrender.com",
-];
-
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
+
+// const allowedOrigins = [
+//   "http://localhost:5173",
+//   "https://chatty-ui-2z90.onrender.com",
+// ];
+
+// app.use(
+//   cors({
+//     origin: allowedOrigins,
+//     credentials: true,
+//   })
+// );
 //
 
 app.use("/api/auth", authRoutes);
