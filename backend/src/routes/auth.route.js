@@ -5,7 +5,6 @@ import {
   logout,
   signup,
   sendOTP,
-  checkotp,
   sendForgotOTP,
   savePassword,
   updateProfile,
