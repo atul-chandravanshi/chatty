@@ -17,7 +17,6 @@ router.post("/send-otp", sendOTP);
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
-router.post("/checkotp", checkotp);
 router.post("/sendforgototp", sendForgotOTP);
 router.post("/setpassword", savePassword);
 

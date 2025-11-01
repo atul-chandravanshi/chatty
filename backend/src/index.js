@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import session from "express-session";
+import MongoStore from "connect-mongo";
 
 import path from "path";
 
@@ -15,6 +17,21 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5001;
 const __dirname = path.resolve();
+
+app.use(
+  session({
+    secret: process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: "sessions",
+    }),
+    cookie: {
+      maxAge: 10 * 60 * 1000,
+    },
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());

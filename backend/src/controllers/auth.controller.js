@@ -4,17 +4,7 @@ import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 import sendOTPByEmail from "../../config/NodeMailer.js";
 
-// auth.controller.js
-let otpStore;
-let emailStore;
 
-
-export const checkotp = async (req, res) => {
-  
-  const otp  = otpStore;
-
-  res.status(200).json({ otp });
-}
 
 export const sendForgotOTP = async (req, res) => {
   try {
@@ -57,11 +47,10 @@ export const sendOTP = async (req, res) => {
 
     // Store OTP in session
     req.session.otp = otp;
-    otpStore = otp;
-
+    req.session.email = email;
     
     // This is a placeholder for your email sending logic
-    await sendOTPByEmail(email, `${otp}`);
+    await sendOTPByEmail(email, otp);
 
     return res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
@@ -102,29 +91,30 @@ export const savePassword = async (req, res) => {
 }
 
 export const signup = async (req, res) => {
-  const { fullName, email, password, otp} = req.body;
+  const { fullName, email, password, otp } = req.body;
+
   try {
-    if (!fullName || !email || !password) {
+    if (!fullName || !email || !password || !otp) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters" });
     }
-   
-    if (otp != req.session.otp) {
+
+    if (req.session.otp !== otp) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    req.session.otp = null;
-
-    const user = await User.findOne({ email });
-    if (user) return res.status(400).json({ message: "Email already exists" });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
-
 
     const newUser = new User({
       fullName,
@@ -132,26 +122,27 @@ export const signup = async (req, res) => {
       password: hashedPassword,
     });
 
+    await newUser.save();
 
-    if (newUser) {
-      // generate jwt token here
-      generateToken(newUser._id, res);
-      await newUser.save();
+    generateToken(newUser._id, res);
 
-      res.status(201).json({
-        _id: newUser._id,
-        fullName: newUser.fullName,
-        email: newUser.email,
-        profilePic: newUser.profilePic,
-      });
-    } else {
-      res.status(400).json({ message: "Invalid user data" });
-    }
+    req.session.otp = null;
+    req.session.email = null;
+
+    res.status(201).json({
+      _id: newUser._id,
+      fullName: newUser.fullName,
+      email: newUser.email,
+      profilePic: newUser.profilePic,
+      message: "Signup successful",
+    });
+    
   } catch (error) {
     console.log("Error in signup controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
