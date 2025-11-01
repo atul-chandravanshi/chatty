@@ -5,8 +5,6 @@ import cors from "cors";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 
-import path from "path";
-
 import { connectDB } from "./lib/db.js";
 
 import authRoutes from "./routes/auth.route.js";
@@ -14,16 +12,17 @@ import messageRoutes from "./routes/message.route.js";
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
+console.log(process.env.MONGO_URL);
+
 
 const PORT = process.env.PORT || 5001;
-const __dirname = path.resolve();
 
 app.use(
   session({
     secret: process.env.JWT_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
+    store: MongoStore.create({      
       mongoUrl: process.env.MONGO_URL,
       collectionName: "sessions",
     }),
