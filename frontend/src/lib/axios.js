@@ -8,10 +8,7 @@
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL:
-    import.meta.env.MODE === "development"
-      ? "http://localhost:5001/api" // Localhost backend
-      : "https://chatty-1.onrender.com/api", // Render backend
+  baseURL:"https://chatty-f4fo.onrender.com/api",
   withCredentials: true,
 });
 
